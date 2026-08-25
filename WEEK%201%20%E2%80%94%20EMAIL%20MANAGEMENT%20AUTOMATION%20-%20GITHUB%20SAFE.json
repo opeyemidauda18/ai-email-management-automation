@@ -1,0 +1,577 @@
+{
+  "name": "WEEK 1 — EMAIL MANAGEMENT AUTOMATION",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        256
+      ],
+      "id": "f347df68-d9e9-4cc7-a932-f4704ccfc5ce",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "35e29f9d-b4a1-43bc-8617-335446dc55e1",
+              "name": "category",
+              "value": "={{ JSON.parse($json.text).category }}",
+              "type": "string"
+            },
+            {
+              "id": "992fbbea-540d-43d3-9fd0-00a82ecc6e38",
+              "name": "priority",
+              "value": "={{ JSON.parse($json.text).priority }}",
+              "type": "string"
+            },
+            {
+              "id": "9998c0d8-f352-4e7a-8b32-adc6dd613728",
+              "name": "recommended_action",
+              "value": "={{ JSON.parse($json.text).recommended_action }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        704,
+        16
+      ],
+      "id": "d4e34ffe-c74b-4585-90c3-92731f8d3b04",
+      "name": "Set Email Category"
+    },
+    {
+      "parameters": {
+        "jsCode": "const category = $('Map Gmail Label').first().json.category;\n\nconst labels = $input.all();\n\nconst labelMap = {\n  'Enquiry': 'Auto/Enquiry',\n  'Complaint': 'Auto/Complaint',\n  'Invoice/Billing': 'Auto/Invoice',\n  'Spam/Newsletter': 'Auto/Spam',\n  'Other': 'Auto/Other'\n};\n\nconst targetLabelName = labelMap[category] || 'Auto/Other';\n\nconst targetLabel = labels.find(\n  item => item.json.name === targetLabelName\n);\n\nif (!targetLabel) {\n  throw new Error(`Gmail label not found: ${targetLabelName}`);\n}\n\nreturn {\n  json: {\n    ...$('Map Gmail Label').first().json,\n    gmailLabel: targetLabelName,\n    gmailLabelId: targetLabel.json.id\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        32
+      ],
+      "id": "b4d6387a-2dd7-4f69-bd86-c4648dcb6aa4",
+      "name": "Resolve Gmail Label ID"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -16,
+        0
+      ],
+      "id": "82d4b2cd-e188-4eeb-9e1d-493473eb358a",
+      "name": "Receive New Email"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5f2a0cf0-408b-4002-b773-ed64b02e0f15",
+              "name": "senderEmail",
+              "value": "={{ $json.From }}",
+              "type": "string"
+            },
+            {
+              "id": "e1ac0e61-c22f-47ac-94af-1d94099915ca",
+              "name": "subject",
+              "value": "={{ $json.Subject }}",
+              "type": "string"
+            },
+            {
+              "id": "9f213cda-6bad-4e02-bb0d-391e29a8218d",
+              "name": "snippet",
+              "value": "={{ $json.snippet }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        16
+      ],
+      "id": "0b799925-ce9f-4825-a5ea-00004af2b6e5",
+      "name": "Extract Email Data"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Classify the following email for Adaeze Consulting.\n\nBusiness context:\nAdaeze Consulting is a solo SME growth strategist who provides paid 1:1 strategy sessions.\n\nEmail:\nSender: {{$json.senderEmail}}\nSubject: {{$json.subject}}\nMessage: {{$json.snippet}}\n\nCATEGORY:\nClassify the email into exactly ONE of these categories:\n\n1. Enquiry\n\n* A potential or existing client asking about services, pricing, availability, booking, consultation, or working with Adaeze.\n\n2. Complaint\n\n* A customer expressing dissatisfaction, reporting a service problem, requesting a refund because of a problem, or making a formal complaint.\n\n3. Invoice/Billing\n\n* Questions about invoices, receipts, payments, charges, billing, or payment administration that are not primarily a complaint.\n\n4. Spam/Newsletter\n\n* Newsletters, promotional emails, unsolicited marketing, cold pitches, sales messages, or subscription emails.\n\n5. Other\n\n* Anything that does not clearly fit the categories above.\n\nPRIORITY:\nClassify the urgency of the email as exactly ONE of:\n\nHigh\n\n* Requires prompt human attention.\n* Examples include a serious complaint, urgent client issue, time-sensitive enquiry, or a potential client clearly ready to book.\n\nLow\n\n* Does not require immediate human attention.\n* Examples include newsletters, promotional emails, routine billing questions, general enquiries, or non-urgent messages.\n\nRECOMMENDED ACTION:\nBased on the category, priority, and content of the email, recommend exactly ONE action from the following:\n\nRespond & Schedule\n\n* For a potential client who is interested in booking or discussing a strategy session.\n\nRespond to Client\n\n* For a client enquiry, complaint, or other message that requires a human response.\n\nReview & Resolve\n\n* For a complaint or client issue that requires investigation or resolution.\n\nProcess Payment/Billing\n\n* For invoices, receipts, payment questions, or billing administration.\n\nArchive/Ignore\n\n* For spam, newsletters, promotional emails, or messages that do not require action.\n\nReview Manually\n\n* For emails that do not clearly fit the other actions.\n\nIMPORTANT:\n\n* Return ONLY valid JSON.\n* Do not include markdown.\n* Do not include explanations.\n* Use exactly these keys: \"category\", \"priority\", and \"recommended_action\".\n* \"category\" must be exactly one of: Enquiry, Complaint, Invoice/Billing, Spam/Newsletter, Other.\n* \"priority\" must be exactly one of: High, Low.\n* \"recommended_action\" must be exactly one of: Respond & Schedule, Respond to Client, Review & Resolve, Process Payment/Billing, Archive/Ignore, Review Manually.\n\nReturn format:\n{\"category\":\"Enquiry\",\"priority\":\"High\",\"recommended_action\":\"Respond & Schedule\"}\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        384,
+        16
+      ],
+      "id": "9c7ae6b6-2518-4d19-878e-eb13dba3888d",
+      "name": "AI Classify Email"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {
+          "includeUnpaired": false
+        }
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        976,
+        32
+      ],
+      "id": "a89920f6-c062-4ee4-8737-05dc6d19f2ed",
+      "name": "Prepare Email Record"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "daf9657d-f77e-40e5-95c7-67e157a7888a",
+              "name": "gmailLabel",
+              "value": "={{   {     \"Enquiry\": \"Auto/Enquiry\",     \"Complaint\": \"Auto/Complaint\",     \"Invoice/Billing\": \"Auto/Invoice\",     \"Spam/Newsletter\": \"Auto/Spam\",     \"Other\": \"Auto/Other\"   }[$json.category] || \"Auto/Other\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1152,
+        32
+      ],
+      "id": "4650643c-44a8-4ae9-8b23-506d76531ef0",
+      "name": "Map Gmail Label"
+    },
+    {
+      "parameters": {
+        "resource": "label"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1312,
+        32
+      ],
+      "id": "fd5e693e-222c-4de7-a270-999e08ef8aa4",
+      "name": "Get Gmail Labels"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": "={{$json.gmailLabelId}}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        400
+      ],
+      "id": "b7e11cf8-a5fc-4cb9-a3c3-23810c2e0347",
+      "name": "Apply Gmail Label"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Adaeze Consulting - Email Log"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "YOUR_SHEET_GID",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ new Date().toISOString() }}",
+            "Sender": "={{ $('Resolve Gmail Label ID').item.json.From }}",
+            "Subject": "={{ $('Resolve Gmail Label ID').first().json.subject }}",
+            "Category": "={{ $('Resolve Gmail Label ID').first().json.category }}",
+            "Priority": "={{ $('Map Gmail Label').item.json.priority }}",
+            "Recommended Action |": "={{ $('Map Gmail Label').item.json.recommended_action }}",
+            "Status": "={{ $json.category === \"Spam/Newsletter\" ? \"Not Relevant\" : \"New\" }}",
+            "View Email": "={{ '=HYPERLINK(\"https://mail.google.com/mail/u/0/#inbox/' + $('Map Gmail Label').item.json.id + '\",\"🔗 Open Email\")' }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sender",
+              "displayName": "Sender",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Subject",
+              "displayName": "Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Recommended Action |",
+              "displayName": "Recommended Action |",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "View Email",
+              "displayName": "View Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        848,
+        400
+      ],
+      "id": "111edc76-799a-48d2-8c73-903c5a7c4353",
+      "name": "Log Email to Sheets"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.Category }}",
+                    "rightValue": "Enquiry",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "dcc781f6-64a8-4a59-a0b7-9e8198b54ebe"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Enquiry Alert"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e68f6c16-91d6-4c38-a5ac-9f90cce39c35",
+                    "leftValue": "={{ $json.Category }}",
+                    "rightValue": "Complaint",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Complaint Alert"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1056,
+        400
+      ],
+      "id": "0a93ad05-4bee-4839-8602-dd980391cdcf",
+      "name": "Route Slack Alerts"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "YOUR_SLACK_CHANNEL_ID",
+          "mode": "list"
+        },
+        "text": "={{   `🚨 ${$('Resolve Gmail Label ID').first().json.priority} Priority ${$('Resolve Gmail Label ID').first().json.category}  From: ${$('Resolve Gmail Label ID').first().json.senderEmail} Subject: ${$('Resolve Gmail Label ID').first().json.subject}  This email requires attention.` }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        1376,
+        400
+      ],
+      "id": "c9d27691-c9c5-4d68-b86c-49a701c30c78",
+      "name": "Send Slack Alert"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Classify Email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Email Category": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve Gmail Label ID": {
+      "main": [
+        [
+          {
+            "node": "Apply Gmail Label",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive New Email": {
+      "main": [
+        [
+          {
+            "node": "Extract Email Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Email Data": {
+      "main": [
+        [
+          {
+            "node": "AI Classify Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepare Email Record",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "AI Classify Email": {
+      "main": [
+        [
+          {
+            "node": "Set Email Category",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Record": {
+      "main": [
+        [
+          {
+            "node": "Map Gmail Label",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Gmail Label": {
+      "main": [
+        [
+          {
+            "node": "Get Gmail Labels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Gmail Labels": {
+      "main": [
+        [
+          {
+            "node": "Resolve Gmail Label ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply Gmail Label": {
+      "main": [
+        [
+          {
+            "node": "Log Email to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Email to Sheets": {
+      "main": [
+        [
+          {
+            "node": "Route Slack Alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Slack Alerts": {
+      "main": [
+        [
+          {
+            "node": "Send Slack Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Slack Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "NzDzUvFDLSUjXPNS",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "nodeGroups": [],
+  "tags": []
+}
