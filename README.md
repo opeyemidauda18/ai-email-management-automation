@@ -198,3 +198,10 @@ Sensitive credentials and private account configuration have been removed from t
 
 Built as part of a practical AI Automation portfolio.
 
+
+
+## Workflow Screenshot
+
+![Email Management Workflow](email-management-workflow.png)
+
+
