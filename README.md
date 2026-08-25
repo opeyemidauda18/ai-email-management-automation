@@ -202,6 +202,6 @@ Built as part of a practical AI Automation portfolio.
 
 ## Workflow Screenshot
 
-![Email Management Workflow](email-management-workflow.png)
+![Email Management Workflow](email-management-workflow%5C.png.png)
 
 
