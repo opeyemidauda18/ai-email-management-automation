@@ -200,7 +200,9 @@ Built as part of a practical AI Automation portfolio.
 
 
 
-## Workflow Screenshot
+## 🖼️ Workflow Screenshots
+
+### Complete Workflow
 
 ![Email Management Workflow](email-management-workflow.png.png)
 
@@ -210,28 +212,18 @@ Built as part of a practical AI Automation portfolio.
 
 ### Google Sheets Email Logging
 
-The workflow also logs processed emails into Google Sheets for tracking and record-keeping.
-
-The log captures key information such as:
-
-- Timestamp
-- Sender
-- Email subject
-- Classification category
-- Status
-- Priority
-- Gmail message reference/link
+The workflow logs processed emails in Google Sheets for centralized tracking and record-keeping.
 
 ![Google Sheets Email Log](./google-sheets-email-log.png.png)
 
 ### Slack Email Alerts
 
-For emails requiring attention, the workflow sends an automated alert to Slack with the relevant email details and classification.
+Emails requiring attention trigger an automated Slack notification containing the relevant email details and classification.
 
 ![Slack Email Alert](./slack-email-alert.png.png)
 
 ### Error Handling & Slack Alerts
 
-The workflow includes an error-handling mechanism that automatically sends a Slack notification when an execution fails. This provides visibility into workflow failures and allows issues to be investigated promptly.
+A separate error-handling workflow sends a Slack notification when the automation encounters an execution error, providing visibility for troubleshooting.
 
 ![Slack Error Alert](./slack-error-alert.png.png)
