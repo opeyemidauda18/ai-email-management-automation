@@ -203,3 +203,7 @@ Built as part of a practical AI Automation portfolio.
 ## Workflow Screenshot
 
 ![Email Management Workflow](email-management-workflow.png.png)
+
+### AI Classification Node
+
+![AI Classification Node](ai-classify-email-node.png.png)
