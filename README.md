@@ -222,4 +222,4 @@ The log captures key information such as:
 - Priority
 - Gmail message reference/link
 
-![Google Sheets Email Log](google-sheets-email-log.png)
+![Google Sheets Email Log](./google-sheets-email-log.png.png)
