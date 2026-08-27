@@ -115,7 +115,7 @@ This keeps the Gmail inbox organized without requiring manual categorization.
 
 ## 🚨 Slack Alerts
 
-Emails requiring attention can be routed to Slack.
+High-priority emails are automatically routed to Slack for immediate visibility.
 
 The alert includes information such as:
 
@@ -124,8 +124,7 @@ The alert includes information such as:
 * Sender
 * Subject
 
-This provides a quick notification when an email requires human attention.
-
+Low-priority emails are not routed to Slack, but they are still logged in Google Sheets and organized in Gmail.
 ---
 
 ## 🛡️ Error Handling
