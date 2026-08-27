@@ -226,3 +226,9 @@ Emails requiring attention trigger an automated Slack notification containing th
 A separate error-handling workflow sends a Slack notification when the automation encounters an execution error, providing visibility for troubleshooting.
 
 ![Slack Error Alert](./slack-error-alert.png.png)
+
+### Google Sheets Email Logging
+
+The workflow logs processed emails in Google Sheets for centralized tracking and record-keeping.
+
+![Google Sheets Log Output](./google-sheets-log-output.png)
