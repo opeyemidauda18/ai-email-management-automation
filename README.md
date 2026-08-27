@@ -111,6 +111,8 @@ Other            → Auto/Other
 
 This keeps the Gmail inbox organized without requiring manual categorization.
 
+![Gmail Auto Label](./gmail-auto-label.png.png)
+
 ---
 
 ## 🚨 Slack Alerts
