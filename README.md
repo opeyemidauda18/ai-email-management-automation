@@ -207,3 +207,19 @@ Built as part of a practical AI Automation portfolio.
 ### AI Classification Node
 
 ![AI Classification Node](ai-classify-email-node.png.png)
+
+### Google Sheets Email Logging
+
+The workflow also logs processed emails into Google Sheets for tracking and record-keeping.
+
+The log captures key information such as:
+
+- Timestamp
+- Sender
+- Email subject
+- Classification category
+- Status
+- Priority
+- Gmail message reference/link
+
+![Google Sheets Email Log](google-sheets-email-log.png)
