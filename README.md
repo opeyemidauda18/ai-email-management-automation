@@ -223,3 +223,9 @@ The log captures key information such as:
 - Gmail message reference/link
 
 ![Google Sheets Email Log](./google-sheets-email-log.png.png)
+
+### Slack Email Alerts
+
+For emails requiring attention, the workflow sends an automated alert to Slack with the relevant email details and classification.
+
+![Slack Email Alert](./slack-email-alert.png.png)
