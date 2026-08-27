@@ -231,4 +231,4 @@ A separate error-handling workflow sends a Slack notification when the automatio
 
 The workflow logs processed emails in Google Sheets for centralized tracking and record-keeping.
 
-![Google Sheets Log Output](./google-sheets-log-output.png)
+![Google Sheets Log Output](./google-sheets-log-output.png.png)
