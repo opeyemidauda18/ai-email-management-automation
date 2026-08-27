@@ -229,3 +229,9 @@ The log captures key information such as:
 For emails requiring attention, the workflow sends an automated alert to Slack with the relevant email details and classification.
 
 ![Slack Email Alert](./slack-email-alert.png.png)
+
+### Error Handling & Slack Alerts
+
+The workflow includes an error-handling mechanism that automatically sends a Slack notification when an execution fails. This provides visibility into workflow failures and allows issues to be investigated promptly.
+
+![Slack Error Alert](./slack-error-alert.png.png)
