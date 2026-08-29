@@ -1,236 +1,172 @@
-# Week 1 — Email Management Automation
+Week 1: Email Management Automation
 
-## 📌 Project Overview
+Project Overview
 
-An AI-powered email management and triage automation built for **Adaeze Consulting**, a solo SME growth strategist who provides paid 1:1 strategy sessions.
+I built an AI-powered email management workflow for Adaeze Consulting, a solo SME growth strategist who provides paid 1:1 strategy sessions.
 
-The automation processes incoming emails, uses AI to classify them, determines their priority, recommends the appropriate action, applies Gmail labels, logs the email information in Google Sheets, and sends Slack alerts for emails that require attention.
+The goal was to automate the first stage of email handling. Instead of manually checking every incoming message, the workflow uses AI to understand the email, assign a category and priority, recommend an action, organize the message in Gmail, log it in Google Sheets, and alert Adaeze in Slack when an email requires prompt attention.
 
----
+The Problem
 
-## 🎯 Business Problem
+Adaeze Consulting receives different types of emails, including client enquiries, complaints, billing messages, newsletters, promotional emails, and other general communications.
 
-Adaeze Consulting receives different types of emails, including potential client enquiries, complaints, billing-related messages, newsletters, and other communications.
+Manually reviewing and sorting these emails can take time, especially when important enquiries or complaints are mixed in with less important messages.
 
-Manually reviewing and organizing every email can be time-consuming and makes it easier for important messages to be overlooked.
+I designed the workflow to handle the initial triage automatically while still keeping the final decision with the business owner.
 
-This automation was designed to reduce manual email triage and give Adaeze a structured way to manage incoming communications.
+How I Built It
 
----
+The workflow starts when a new email enters the Gmail inbox.
 
-## ⚙️ How the Automation Works
+The email data is extracted and passed to Gemini for classification. The AI returns the email category, priority, and recommended action.
 
-```text
-New Email
-    ↓
-Gmail Trigger
-    ↓
-Extract Email Data
-    ↓
+The workflow then uses those results to:
+
+1. Prepare the email record.
+2. Match the AI category to the appropriate Gmail label.
+3. Retrieve the available Gmail labels.
+4. Apply the correct label to the email.
+5. Log the email details in Google Sheets.
+6. Check whether the email is high priority.
+7. Send a Slack notification when human attention is required.
+
+This gives the workflow a simple path from incoming email to classification, organization, tracking, and notification.
+
 AI Email Classification
-    ↓
-Set Category, Priority & Recommended Action
-    ↓
-Prepare Email Record
-    ↓
-Map Gmail Label
-    ↓
-Retrieve Gmail Labels
-    ↓
-Apply Appropriate Gmail Label
-    ↓
-Log Email in Google Sheets
-    ↓
-Route Important Emails
-    ↓
-Slack Alert
-```
 
----
+I used Google Gemini to classify each email into one of five categories:
 
-## 🤖 AI Classification
-
-Google Gemini analyzes each incoming email and classifies it into exactly one of five categories:
-
-| Category            | Description                                                                                                              |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| **Enquiry**         | Potential or existing client asking about services, pricing, availability, booking, consultation, or working with Adaeze |
-| **Complaint**       | Customer dissatisfaction, service problems, refund requests caused by a problem, or formal complaints                    |
-| **Invoice/Billing** | Invoices, receipts, payments, charges, or billing administration                                                         |
-| **Spam/Newsletter** | Newsletters, promotional emails, unsolicited marketing, cold pitches, sales messages, or subscription emails             |
-| **Other**           | Emails that do not clearly fit the other categories                                                                      |
+Category| Used for
+Enquiry| Potential or existing clients asking about services, pricing, availability, consultations, or working with Adaeze
+Complaint| Customer dissatisfaction, service problems, refund requests caused by a problem, or formal complaints
+Invoice/Billing| Invoices, receipts, payments, charges, and other billing-related messages
+Spam/Newsletter| Newsletters, promotional emails, unsolicited marketing, cold pitches, sales messages, and subscription emails
+Other| Emails that do not clearly fit the other categories
 
 The AI also assigns a priority:
 
-* **High** — requires prompt human attention
-* **Low** — does not require immediate attention
+- High: requires prompt human attention
+- Low: does not require immediate attention
 
----
+The workflow also asks Gemini to recommend an appropriate next action:
 
-## 💡 Recommended Actions
+- Respond & Schedule
+- Respond to Client
+- Review & Resolve
+- Process Payment/Billing
+- Archive/Ignore
+- Review Manually
 
-The AI recommends one appropriate action based on the email:
+Gmail Organization
 
-* **Respond & Schedule**
-* **Respond to Client**
-* **Review & Resolve**
-* **Process Payment/Billing**
-* **Archive/Ignore**
-* **Review Manually**
+After classification, the workflow maps the AI category to a Gmail label.
 
----
-
-## 📊 Google Sheets Email Log
-
-Each processed email is recorded in a Google Sheets tracker containing:
-
-* Timestamp
-* Sender
-* Subject
-* Category
-* Priority
-* Recommended Action
-* Status
-* View Email
-
-The **View Email** field provides a direct link back to the original Gmail message, allowing the user to quickly review the email.
-
----
-
-## 🏷️ Automated Gmail Organization
-
-Emails are automatically assigned Gmail labels according to their AI classification:
-
-```text
 Enquiry          → Auto/Enquiry
 Complaint        → Auto/Complaint
 Invoice/Billing  → Auto/Invoice
 Spam/Newsletter  → Auto/Spam
 Other            → Auto/Other
-```
 
-This keeps the Gmail inbox organized without requiring manual categorization.
+This means emails can be organized automatically without manually assigning labels to each message.
 
-![Gmail Auto Label](./gmail-auto-label.png.png)
+"Gmail Auto Label" (./gmail-auto-label.png.png)
 
----
+Google Sheets Email Log
 
-## 🚨 Slack Alerts
+I created a Google Sheets tracker to keep a record of processed emails.
 
-High-priority emails are automatically routed to Slack for immediate visibility.
+Each entry contains:
 
-The alert includes information such as:
+- Timestamp
+- Sender
+- Subject
+- Category
+- Priority
+- Recommended Action
+- Status
+- View Email
 
-* Priority
-* Category
-* Sender
-* Subject
+The View Email field contains a direct link to the original Gmail message, making it easier to go from the tracker back to the actual email.
 
-Low-priority emails are not routed to Slack, but they are still logged in Google Sheets and organized in Gmail.
----
+"Google Sheets Email Log" (./google-sheets-email-log.png.png)
 
-## 🛡️ Error Handling
+"Google Sheets Log Output" (./google-sheets-log-output.png.png)
 
-A separate error-handling workflow has been connected to the main automation.
+Slack Notifications
 
-```text
+Not every email needs an immediate notification, so I added a priority-based routing step.
+
+When an email is classified as High priority, the workflow sends an alert to Slack containing relevant information such as:
+
+- Priority
+- Category
+- Sender
+- Subject
+
+Low-priority emails are not sent to Slack. They are still labelled in Gmail and recorded in Google Sheets.
+
+"Slack Email Alert" (./slack-email-alert.png.png)
+
+Error Handling
+
+I also connected a separate error-handling workflow to the main automation.
+
+If the main workflow encounters an execution error, the error workflow is triggered and sends a Slack notification.
+
 Main Workflow Error
         ↓
 Error Trigger
         ↓
 Slack Alert
-        ↓
-Adaeze is notified
-```
 
-The error handler is designed to provide information about the failed workflow and node so that the issue can be investigated quickly.
+The alert provides information about the failed execution and node, making it easier to identify where the problem occurred.
 
----
+"Slack Error Alert" (./slack-error-alert.png.png)
 
-## 🧰 Tools Used
+Tools Used
 
-* **n8n** — workflow automation
-* **Gmail** — email trigger and organization
-* **Google Gemini** — AI email classification
-* **Google Sheets** — email tracking and logging
-* **Slack** — notifications and alerts
+- n8n for workflow automation
+- Gmail for email intake and organization
+- Google Gemini for AI classification
+- Google Sheets for email logging
+- Slack for notifications and error alerts
 
----
+Project Files
 
-## 🔑 Key Automation Features
+The repository contains a sanitized n8n workflow export:
 
-* Automated email intake
-* AI-powered email classification
-* Priority detection
-* Recommended action generation
-* Automated Gmail labeling
-* Centralized email tracking
-* Direct Gmail message links
-* Slack notifications
-* Error-handling workflow
+"WEEK 1 — EMAIL MANAGEMENT AUTOMATION - GITHUB SAFE.json"
 
----
+Credentials and private account configuration were removed before uploading the workflow to GitHub.
 
-## 📈 Outcome
+Screenshots
 
-The workflow transforms incoming emails from an unstructured inbox into an organized email management system.
+Complete Workflow
 
-Instead of manually reviewing and categorizing every message, the automation provides:
+"Email Management Workflow" (./email-management-workflow.png.png)
 
-**Classification → Prioritization → Recommended Action → Organization → Tracking → Notification**
+AI Classification Node
 
-This allows the user to focus human attention on emails that actually require it.
+"AI Classification Node" (./ai-classify-email-node.png.png)
 
----
+Google Sheets Email Logging
 
-## 📁 Project File
+"Google Sheets Email Log" (./google-sheets-email-log.png.png)
 
-The repository includes the sanitized n8n workflow export:
+Slack Email Alert
 
-`WEEK 1 — EMAIL MANAGEMENT AUTOMATION - GITHUB SAFE.json`
+"Slack Email Alert" (./slack-email-alert.png.png)
 
-Sensitive credentials and private account configuration have been removed from the public workflow export.
+Error Handling
 
----
+"Slack Error Alert" (./slack-error-alert.png.png)
 
-## 👩🏽‍💻 Project Type
+Google Sheets Output
 
-**AI Automation | Email Management | Workflow Automation | Business Process Automation**
+"Google Sheets Log Output" (./google-sheets-log-output.png.png)
 
-Built as part of a practical AI Automation portfolio.
+Project Type
 
+AI Automation | Email Management | Workflow Automation | Business Process Automation
 
-
-## 🖼️ Workflow Screenshots
-
-### Complete Workflow
-
-![Email Management Workflow](email-management-workflow.png.png)
-
-### AI Classification Node
-
-![AI Classification Node](ai-classify-email-node.png.png)
-
-### Google Sheets Email Logging
-
-The workflow logs processed emails in Google Sheets for centralized tracking and record-keeping.
-
-![Google Sheets Email Log](./google-sheets-email-log.png.png)
-
-### Slack Email Alerts
-
-Emails requiring attention trigger an automated Slack notification containing the relevant email details and classification.
-
-![Slack Email Alert](./slack-email-alert.png.png)
-
-### Error Handling & Slack Alerts
-
-A separate error-handling workflow sends a Slack notification when the automation encounters an execution error, providing visibility for troubleshooting.
-
-![Slack Error Alert](./slack-error-alert.png.png)
-
-### Google Sheets Email Logging
-
-The workflow logs processed emails in Google Sheets for centralized tracking and record-keeping.
-
-![Google Sheets Log Output](./google-sheets-log-output.png.png)
+Built as part of my practical AI Automation portfolio.
